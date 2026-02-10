@@ -18,11 +18,11 @@ import Streamly.Internal.Data.MutByteArray (MutByteArray(..), Serialize(..))
 import qualified Data.Text.Internal as Strict (Text(..))
 import qualified Data.Text.Lazy as Lazy
 import qualified Streamly.Internal.Data.MutByteArray as MBA
+import GHC.Exts
 
 #if MIN_VERSION_text(2,0,0)
 
-import qualified Data.Text.Array as TArr (Array(..))
-#define T_ARR_CON TArr.ByteArray
+data MyArray = MyArray ByteArray#
 #define LEN_TO_BYTES(l) l
 
 #else
@@ -32,8 +32,6 @@ import qualified Data.Text.Array as TArr (Array(..))
 #define LEN_TO_BYTES(l) l * 2
 
 #endif
-
-import GHC.Exts
 
 --------------------------------------------------------------------------------
 -- Strict Text
@@ -59,8 +57,12 @@ instance Serialize Strict.Text where
             pure
                 ( off1 + lenBytes
                 , Strict.Text
+#if MIN_VERSION_text(2,0,0)
+                      (unsafeCoerce# (MyArray (unsafeCoerce# (MBA.getMutableByteArray# newArr))))
+#else
                       (T_ARR_CON
                           (unsafeCoerce# (MBA.getMutableByteArray# newArr)))
+#endif
                       0
                       lenTArr
                 )
@@ -69,7 +71,12 @@ instance Serialize Strict.Text where
                 ++ " end = " ++ show end
 
     {-# INLINE serializeAt #-}
+#if MIN_VERSION_text(2,0,0)
+    serializeAt off arr (Strict.Text txtArr offTArr lenTArr) = do
+        let barr# = case unsafeCoerce# txtArr of MyArray b -> b
+#else
     serializeAt off arr (Strict.Text (T_ARR_CON barr#) offTArr lenTArr) = do
+#endif
         off1 <- serializeAt off arr (fromIntegral lenTArr :: Int64)
         let lenBytes = LEN_TO_BYTES(lenTArr)
         MBA.putSliceUnsafe
