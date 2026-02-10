@@ -28,8 +28,8 @@ data MyArray = MyArray ByteArray#
 #else
 
 import qualified Data.Text.Array as TArr (Array(..))
-#define T_ARR_CON TArr.Array
-#define LEN_TO_BYTES(l) l * 2
+#define T_ARR_CON TArr.ByteArray
+#define LEN_TO_BYTES(l) (l * 2)
 
 #endif
 
