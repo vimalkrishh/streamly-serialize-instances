@@ -112,7 +112,7 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base           >= 4.12     && < 4.19
+    build-depends:    base>=4.19 && <4.20
                       -- We use Internal modules in streamly-core, hence the
                       -- restrictive constraints.
                     , streamly-core  == 0.2.0.*
