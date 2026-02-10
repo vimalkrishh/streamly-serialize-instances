@@ -27,9 +27,7 @@ data MyArray = MyArray ByteArray#
 
 #else
 
-import qualified Data.Text.Array as TArr (Array, ByteArray)
-
-#define T_ARR_CON TArr.ByteArray
+import qualified Data.Text.Array as TArr (Array(..))
 #define LEN_TO_BYTES(l) (l * 2)
 
 #endif
@@ -61,7 +59,7 @@ instance Serialize Strict.Text where
 #if MIN_VERSION_text(2,0,0)
                       (unsafeCoerce# (MyArray (unsafeCoerce# (MBA.getMutableByteArray# newArr))))
 #else
-                      (T_ARR_CON
+                      (TArr.Array
                           (unsafeCoerce# (MBA.getMutableByteArray# newArr)))
 #endif
                       0
@@ -76,7 +74,7 @@ instance Serialize Strict.Text where
     serializeAt off arr (Strict.Text txtArr offTArr lenTArr) = do
         let barr# = case unsafeCoerce# txtArr of MyArray b -> b
 #else
-    serializeAt off arr (Strict.Text (T_ARR_CON barr#) offTArr lenTArr) = do
+    serializeAt off arr (Strict.Text (TArr.Array barr#) offTArr lenTArr) = do
 #endif
         off1 <- serializeAt off arr (fromIntegral lenTArr :: Int64)
         let lenBytes = LEN_TO_BYTES(lenTArr)
