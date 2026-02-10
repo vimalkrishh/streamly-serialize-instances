@@ -27,7 +27,8 @@ data MyArray = MyArray ByteArray#
 
 #else
 
-import qualified Data.Text.Array as TArr (Array(..))
+import qualified Data.Text.Array as TArr (Array, ByteArray)
+
 #define T_ARR_CON TArr.ByteArray
 #define LEN_TO_BYTES(l) (l * 2)
 
